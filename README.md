@@ -1,51 +1,53 @@
-# Easereader
+# Easereader backend
 
-Simple web app to search EPUB books and send them to your ebook device via email profiles.
+This directory is a backend-only copy of Easereader, prepared for a new user
+interface. The legacy `public/index.html`, screenshots, and HTML examples are
+intentionally not included.
 
-## Run
+See [NEW-UI-FEATURES.md](NEW-UI-FEATURES.md) for the functional specification
+and the API contract the replacement frontend must implement.
 
-### npm start
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
-2. Start the app:
-   ```bash
-   npm start
-   ```
-3. Open: http://localhost:3000
+## Run locally
 
-Selectable source URLs are defined in `BOOK_SOURCE_OPTIONS` near the top of
-`server.js`. Add or remove `{ label, url }` entries there to change the choices
-shown under Settings > Book sources. The browser stores the active strategy and
-one selected URL per strategy in local storage.
+### Backend
 
-### Docker (published image)
-1. Pull image:
-   ```bash
-   docker pull taltiko/easereader
-   ```
-2. Run container:
-   ```bash
-   docker run --rm -p 3000:3000 -v easereader-config:/config taltiko/easereader
-   ```
-3. Open: http://localhost:3000
+```bash
+npm install
+npm start
+```
 
-## Sender/Profile setup
-1. Open Settings.
-2. Add a Sender (SMTP account that sends emails).
-3. Add a Profile (device email + sender to use).
-4. Use profile buttons on search results to send books.
+The API listens on `http://localhost:3000`. There is deliberately no page at
+`/`; API routes live below `/api`, profile images below `/uploads`, and download
+progress is published at `/ws/download-progress`.
 
-Note: your device/service may require sender whitelisting.
+### Frontend
 
-## Screenshots
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-### Desktop
-![Desktop](docs/desktop.png)
+The Vite dev server runs on `http://localhost:5173` and proxies `/api`,
+`/uploads`, and `/ws/download-progress` to the backend on `localhost:3000`.
 
-### Settings
-![Settings](docs/settings.png)
+Available scripts:
 
-### Mobile
-![Mobile](docs/mobile.png)
+- `npm run dev` — start dev server
+- `npm run build` — production build to `frontend/dist`
+- `npm run typecheck` — TypeScript strict check
+- `npm run lint` — ESLint
+- `npm run test` — Vitest unit tests
+- `npm run generate:api` — regenerate `src/api/types.ts` from `src/api/openapi.json`
+
+Persisted configuration defaults to `data/`. Set `CONFIG_DIR` to use another
+location. In Docker, mount a volume at `/config`:
+
+```bash
+docker build -t easereader-newui .
+docker run --rm -p 3000:3000 -v easereader-config:/config easereader-newui
+```
+
+Selectable source domains are controlled by `BOOK_SOURCE_OPTIONS` near the top
+of `server.js`. The backend rejects source URLs that are not in that allowlist.
+

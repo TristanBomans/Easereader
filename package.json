@@ -1,7 +1,7 @@
 {
   "name": "ebook-search",
   "version": "1.0.0",
-  "description": "Simple ebook search app",
+  "description": "Backend API for Easereader",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"

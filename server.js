@@ -60,7 +60,8 @@ const upload = multer({
 
 // ── Middleware ───────────────────────────────────────────────────────────────
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+// The legacy frontend was deliberately removed. A future UI can consume the
+// JSON API below and may be hosted separately or mounted here later.
 app.use('/uploads', express.static(UPLOADS_DIR));
 
 // ── Puppeteer browser ────────────────────────────────────────────────────────
@@ -592,11 +593,20 @@ app.get('/api/debug/html/:id', (req, res) => {
   res.send(item.html);
 });
 
+// Serve production frontend build if present.
+const frontendDist = path.join(__dirname, 'frontend', 'dist');
+if (fs.existsSync(frontendDist)) {
+  app.use(express.static(frontendDist));
+  app.get('*', (_req, res) => {
+    res.sendFile(path.join(frontendDist, 'index.html'));
+  });
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // START
 // ═══════════════════════════════════════════════════════════════════════════
 
-const server = app.listen(PORT, () => console.log(`Ebook search running at http://localhost:${PORT}`));
+const server = app.listen(PORT, () => console.log(`Easereader API running at http://localhost:${PORT}`));
 progressWebSocketServer = new WebSocketServer({ server, path: '/ws/download-progress' });
 progressWebSocketServer.on('connection', socket => {
   socket.send(JSON.stringify({ type: 'connected', timestamp: new Date().toISOString() }));
