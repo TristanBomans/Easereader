@@ -19,6 +19,8 @@ const BOOK_SOURCE_OPTIONS = {
   zlibrary: [
     { label: 'articles.sk', url: 'https://articles.sk' },
     { label: '1lib.sk', url: 'https://1lib.sk' },
+    { label: 'zlib.bz', url: 'https://zlib.bz' },
+    { label: 'z-library.website', url: 'https://z-library.website' },
   ],
   AnnasArchive: [
     { label: 'annas-archive.gl', url: 'https://annas-archive.gl' },
@@ -147,15 +149,19 @@ function remoteHttpError(statusCode, baseUrl) {
 }
 
 // ── Get cookies from Puppeteer context ───────────────────────────────────────
-async function getSkCookies() {
+async function getSourceCookies(baseUrl) {
   const b = await getBrowser();
   const tmp = await b.newPage();
   try {
     const client = await tmp.createCDPSession();
     const { cookies } = await client.send('Network.getAllCookies');
     await client.detach();
+    const hostname = new URL(baseUrl).hostname;
     return cookies
-      .filter(c => c.domain && c.domain.includes('.sk'))
+      .filter(c => {
+        const domain = (c.domain || '').replace(/^\./, '');
+        return domain && (hostname === domain || hostname.endsWith(`.${domain}`));
+      })
       .map(c => `${c.name}=${c.value}`)
       .join('; ');
   } finally {
@@ -189,7 +195,7 @@ async function fetchDownloadFromBase(dlPath, baseUrl, cookieStr) {
 async function downloadToBuffer(dlPath, _title = '', baseUrl) {
   if (!dlPath || !/^\/dl\/[A-Za-z0-9_-]+$/.test(dlPath)) throw new Error('Invalid download path');
 
-  const cookieStr = await getSkCookies();
+  const cookieStr = await getSourceCookies(baseUrl);
   try {
     const result = await fetchDownloadFromBase(dlPath, baseUrl, cookieStr);
     if (!detectHtmlPayload(result.buffer, result.contentType)) return result;

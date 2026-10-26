@@ -16,6 +16,25 @@ export type SourcePreferences = {
 };
 
 export const STORAGE_KEY = 'easereader.bookSources';
+const CHANGE_EVENT = 'easereader:book-sources-changed';
+
+export function subscribeSourcePreferences(onChange: () => void): () => void {
+  const onStorage = (event: StorageEvent) => {
+    if (event.storageArea === localStorage && (event.key === STORAGE_KEY || event.key === null)) {
+      onChange();
+    }
+  };
+  window.addEventListener(CHANGE_EVENT, onChange);
+  window.addEventListener('storage', onStorage);
+  return () => {
+    window.removeEventListener(CHANGE_EVENT, onChange);
+    window.removeEventListener('storage', onStorage);
+  };
+}
+
+export function getSourcePreferencesSnapshot(): string | null {
+  return localStorage.getItem(STORAGE_KEY);
+}
 
 const DEFAULT_STRATEGY: SourcePreferences['strategy'] = 'source';
 
@@ -29,9 +48,8 @@ export function getDefaultPreferences(options: BookSourceOptions): SourcePrefere
   };
 }
 
-export function loadSourcePreferences(): SourcePreferences | null {
+export function loadSourcePreferences(raw = getSourcePreferencesSnapshot()): SourcePreferences | null {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as unknown;
     if (
@@ -53,7 +71,10 @@ export function loadSourcePreferences(): SourcePreferences | null {
 }
 
 export function saveSourcePreferences(preferences: SourcePreferences): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences));
+  const serialized = JSON.stringify(preferences);
+  if (getSourcePreferencesSnapshot() === serialized) return;
+  localStorage.setItem(STORAGE_KEY, serialized);
+  window.dispatchEvent(new Event(CHANGE_EVENT));
 }
 
 export function validateAndNormalizePreferences(

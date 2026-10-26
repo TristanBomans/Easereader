@@ -1,28 +1,36 @@
 import * as React from 'react';
 import { useBookSources as useBookSourcesQuery } from '../api/queries/bookSources';
 import type { SourcePreferences } from '../lib/sourcePreferences';
-import { resolveSourcePreferences, saveSourcePreferences } from '../lib/sourcePreferences';
+import {
+  getDefaultPreferences,
+  getSourcePreferencesSnapshot,
+  loadSourcePreferences,
+  saveSourcePreferences,
+  subscribeSourcePreferences,
+  validateAndNormalizePreferences,
+} from '../lib/sourcePreferences';
 
 export function useBookSources() {
   const { data: options, isLoading, error } = useBookSourcesQuery();
 
-  const [preferences, setPreferencesState] = React.useState<SourcePreferences | null>(null);
+  const saved = React.useSyncExternalStore(subscribeSourcePreferences, getSourcePreferencesSnapshot);
+  const preferences = React.useMemo(() => {
+    if (!options) return null;
+    return validateAndNormalizePreferences(
+      loadSourcePreferences(saved) ?? getDefaultPreferences(options),
+      options
+    );
+  }, [options, saved]);
 
   React.useEffect(() => {
-    if (options) {
-      setPreferencesState((prev) => {
-        const resolved = resolveSourcePreferences(options, prev ?? undefined);
-        return resolved;
-      });
-    }
-  }, [options]);
+    if (preferences) saveSourcePreferences(preferences);
+  }, [preferences]);
 
   const setPreferences = React.useCallback(
     (next: SourcePreferences) => {
       if (!options) return;
-      const validated = resolveSourcePreferences(options, next);
+      const validated = validateAndNormalizePreferences(next, options);
       saveSourcePreferences(validated);
-      setPreferencesState(validated);
     },
     [options]
   );
