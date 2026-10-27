@@ -15,7 +15,7 @@ const STRATEGIES = [
 
 export function StrategyToggle({ value, disabled, onChange }: StrategyToggleProps) {
   return (
-    <div className="inline-flex rounded-md border border-border p-0.5" role="group" aria-label="Book source">
+    <div className="inline-flex shrink-0 rounded-md border border-border p-0.5" role="group" aria-label="Book source">
       {STRATEGIES.map(({ id, label, icon: Icon }) => {
         const active = value === id;
         return (
@@ -26,11 +26,11 @@ export function StrategyToggle({ value, disabled, onChange }: StrategyToggleProp
             disabled={disabled}
             aria-pressed={active}
             className={cn(
-              'flex items-center gap-1.5 rounded px-2.5 py-1 text-xs transition-colors duration-150 disabled:opacity-50',
+              'flex items-center gap-1.5 whitespace-nowrap rounded px-2.5 py-1 text-xs transition-colors duration-150 disabled:opacity-50',
               active ? 'bg-surface-elevated text-text-primary' : 'text-text-muted hover:text-text-secondary'
             )}
           >
-            <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+            <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             {label}
           </button>
         );
