@@ -26,7 +26,7 @@ export function StrategyToggle({ value, disabled, onChange }: StrategyToggleProp
             disabled={disabled}
             aria-pressed={active}
             className={cn(
-              'flex items-center gap-1.5 whitespace-nowrap rounded px-2.5 py-1 text-xs transition-colors duration-150 disabled:opacity-50',
+              'flex items-center gap-1 whitespace-nowrap rounded px-1.5 py-1 text-xs transition-colors duration-150 disabled:opacity-50 sm:gap-1.5 sm:px-2.5',
               active ? 'bg-surface-elevated text-text-primary' : 'text-text-muted hover:text-text-secondary'
             )}
           >

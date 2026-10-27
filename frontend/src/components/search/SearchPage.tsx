@@ -69,7 +69,7 @@ export function SearchPage() {
         onSearch={handleSearch}
       />
 
-      <div className="flex flex-wrap items-center justify-between gap-2">
+      <div className="flex items-center justify-between gap-1.5 sm:gap-2">
         <StrategyToggle
           value={preferences?.strategy}
           disabled={sourcesLoading}
@@ -81,7 +81,7 @@ export function SearchPage() {
         <button
           type="button"
           onClick={() => openSettings('sources')}
-          className="ml-auto flex min-w-0 items-center gap-1.5 rounded-md px-1.5 py-1 text-xs text-text-muted transition-colors duration-150 hover:text-text-secondary"
+          className="ml-auto flex min-w-0 items-center gap-1.5 rounded-md px-1 py-1 text-xs text-text-muted transition-colors duration-150 hover:text-text-secondary sm:px-1.5"
         >
           <span className="truncate">{activeDomainLabel}</span>
           <SlidersHorizontal className="h-3 w-3 shrink-0" aria-hidden="true" />
