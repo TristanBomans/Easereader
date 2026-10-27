@@ -36,7 +36,8 @@ export function getSourcePreferencesSnapshot(): string | null {
   return localStorage.getItem(STORAGE_KEY);
 }
 
-const DEFAULT_STRATEGY: SourcePreferences['strategy'] = 'source';
+const DEFAULT_STRATEGY: SourcePreferences['strategy'] = 'zlibrary';
+const PREFERENCES_VERSION = 2;
 
 export function getDefaultPreferences(options: BookSourceOptions): SourcePreferences {
   const zlibrary = options.zlibrary?.[0]?.url ?? '';
@@ -62,7 +63,21 @@ export function loadSourcePreferences(raw = getSourcePreferencesSnapshot()): Sou
       typeof parsed.zlibraryUrl === 'string' &&
       typeof parsed.sourceUrl === 'string'
     ) {
-      return parsed as SourcePreferences;
+      const previous = parsed as SourcePreferences & { version?: number };
+      if (previous.version !== PREFERENCES_VERSION) {
+        return {
+          strategy: DEFAULT_STRATEGY,
+          zlibraryUrl: ['https://articles.sk', 'https://1lib.sk'].includes(previous.zlibraryUrl)
+            ? 'https://zlib.bz'
+            : previous.zlibraryUrl,
+          sourceUrl: previous.sourceUrl,
+        };
+      }
+      return {
+        strategy: previous.strategy,
+        zlibraryUrl: previous.zlibraryUrl,
+        sourceUrl: previous.sourceUrl,
+      };
     }
   } catch {
     // ignore corrupt storage
@@ -71,7 +86,7 @@ export function loadSourcePreferences(raw = getSourcePreferencesSnapshot()): Sou
 }
 
 export function saveSourcePreferences(preferences: SourcePreferences): void {
-  const serialized = JSON.stringify(preferences);
+  const serialized = JSON.stringify({ ...preferences, version: PREFERENCES_VERSION });
   if (getSourcePreferencesSnapshot() === serialized) return;
   localStorage.setItem(STORAGE_KEY, serialized);
   window.dispatchEvent(new Event(CHANGE_EVENT));

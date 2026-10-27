@@ -1,4 +1,3 @@
-import { useSearch, useNavigate } from '@tanstack/react-router';
 import * as React from 'react';
 import { SlidersHorizontal } from 'lucide-react';
 import { SearchForm } from './SearchForm';
@@ -11,48 +10,11 @@ import { DownloadProgress } from '../progress/DownloadProgress';
 import { openSettings } from '../../stores/settingsStore';
 
 export function SearchPage() {
-  const search = useSearch({ from: '/' });
-  const navigate = useNavigate({ from: '/' });
+  const [query, setQuery] = React.useState('');
 
   const { options, isLoading: sourcesLoading, preferences, setStrategy } = useBookSources();
   const { data: profiles = [] } = useProfiles();
   const { download } = useDownload();
-
-  const updateSearchParams = React.useCallback(
-    (next: Partial<typeof search>) => {
-      void navigate({
-        to: '/',
-        search: { ...search, ...next },
-        replace: true,
-      });
-    },
-    [navigate, search]
-  );
-
-  React.useEffect(() => {
-    if (!preferences) return;
-    if (
-      search.strategy !== preferences.strategy ||
-      search.zlibraryUrl !== preferences.zlibraryUrl ||
-      search.sourceUrl !== preferences.sourceUrl
-    ) {
-      updateSearchParams({
-        strategy: preferences.strategy,
-        zlibraryUrl: preferences.zlibraryUrl,
-        sourceUrl: preferences.sourceUrl,
-      });
-    }
-  }, [preferences, search.strategy, search.zlibraryUrl, search.sourceUrl, updateSearchParams]);
-
-  const handleSearch = (q: string) => {
-    if (!preferences) return;
-    updateSearchParams({
-      q,
-      strategy: preferences.strategy,
-      zlibraryUrl: preferences.zlibraryUrl,
-      sourceUrl: preferences.sourceUrl,
-    });
-  };
 
   const activeDomainLabel = React.useMemo(() => {
     if (!preferences) return '';
@@ -64,19 +26,16 @@ export function SearchPage() {
   return (
     <div className="space-y-4">
       <SearchForm
-        initialQuery={search.q}
+        initialQuery={query}
         isLoading={sourcesLoading}
-        onSearch={handleSearch}
+        onSearch={setQuery}
       />
 
       <div className="flex items-center justify-between gap-1.5 sm:gap-2">
         <StrategyToggle
           value={preferences?.strategy}
           disabled={sourcesLoading}
-          onChange={(strategy) => {
-            setStrategy(strategy);
-            updateSearchParams({ strategy });
-          }}
+          onChange={setStrategy}
         />
         <button
           type="button"
@@ -91,7 +50,7 @@ export function SearchPage() {
 
       {preferences && (
         <SearchResults
-          params={search}
+          params={{ q: query, ...preferences }}
           profiles={profiles}
           onDownload={(params) => void download(params)}
         />

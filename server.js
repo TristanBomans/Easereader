@@ -17,9 +17,9 @@ const PORT     = 3000;
 // accepted from clients must be declared here.
 const BOOK_SOURCE_OPTIONS = {
   zlibrary: [
+    { label: 'zlib.bz', url: 'https://zlib.bz' },
     { label: 'articles.sk', url: 'https://articles.sk' },
     { label: '1lib.sk', url: 'https://1lib.sk' },
-    { label: 'zlib.bz', url: 'https://zlib.bz' },
     { label: 'z-library.website', url: 'https://z-library.website' },
   ],
   AnnasArchive: [

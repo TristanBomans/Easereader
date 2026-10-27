@@ -9,8 +9,8 @@ interface StrategyToggleProps {
 }
 
 const STRATEGIES = [
-  { id: 'source', label: "Anna's Archive", icon: BookOpen },
   { id: 'zlibrary', label: 'Z-Library', icon: Zap },
+  { id: 'source', label: "Anna's Archive", icon: BookOpen },
 ] as const;
 
 export function StrategyToggle({ value, disabled, onChange }: StrategyToggleProps) {

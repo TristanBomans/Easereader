@@ -4,12 +4,14 @@ import {
   loadSourcePreferences,
   validateAndNormalizePreferences,
   resolveSourcePreferences,
+  saveSourcePreferences,
   STORAGE_KEY,
   type BookSourceOptions,
 } from './sourcePreferences';
 
 const sampleOptions: BookSourceOptions = {
   zlibrary: [
+    { label: 'zlib.bz', url: 'https://zlib.bz' },
     { label: 'articles.sk', url: 'https://articles.sk' },
     { label: '1lib.sk', url: 'https://1lib.sk' },
   ],
@@ -26,19 +28,45 @@ describe('sourcePreferences', () => {
 
   it('returns default preferences from options', () => {
     const prefs = getDefaultPreferences(sampleOptions);
-    expect(prefs.strategy).toBe('source');
-    expect(prefs.zlibraryUrl).toBe('https://articles.sk');
+    expect(prefs.strategy).toBe('zlibrary');
+    expect(prefs.zlibraryUrl).toBe('https://zlib.bz');
     expect(prefs.sourceUrl).toBe('https://annas-archive.gl');
   });
 
   it('loads saved preferences', () => {
     const saved = {
-      strategy: 'zlibrary' as const,
-      zlibraryUrl: 'https://1lib.sk',
+      strategy: 'source' as const,
+      zlibraryUrl: 'https://zlib.bz',
       sourceUrl: 'https://annas-archive.pk',
     };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+    saveSourcePreferences(saved);
     expect(loadSourcePreferences()).toEqual(saved);
+  });
+
+  it('migrates existing defaults to Z-Library without losing the backup domain', () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      strategy: 'source',
+      zlibraryUrl: 'https://1lib.sk',
+      sourceUrl: 'https://annas-archive.pk',
+    }));
+    expect(loadSourcePreferences()).toEqual({
+      strategy: 'zlibrary',
+      zlibraryUrl: 'https://zlib.bz',
+      sourceUrl: 'https://annas-archive.pk',
+    });
+    const migrated = resolveSourcePreferences(sampleOptions);
+    saveSourcePreferences(migrated);
+    saveSourcePreferences({ ...migrated, strategy: 'source' });
+    expect(loadSourcePreferences()?.strategy).toBe('source');
+  });
+
+  it('preserves a previously selected working Z-Library domain during migration', () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      strategy: 'source',
+      zlibraryUrl: 'https://z-library.website',
+      sourceUrl: 'https://annas-archive.gl',
+    }));
+    expect(loadSourcePreferences()?.zlibraryUrl).toBe('https://z-library.website');
   });
 
   it('falls back when saved URL is no longer allowed', () => {
@@ -49,7 +77,7 @@ describe('sourcePreferences', () => {
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
     const resolved = resolveSourcePreferences(sampleOptions);
-    expect(resolved.zlibraryUrl).toBe('https://articles.sk');
+    expect(resolved.zlibraryUrl).toBe('https://zlib.bz');
     expect(resolved.sourceUrl).toBe('https://annas-archive.gl');
   });
 
@@ -60,7 +88,7 @@ describe('sourcePreferences', () => {
       sourceUrl: 'https://annas-archive.pk',
     };
     const normalized = validateAndNormalizePreferences(prefs, sampleOptions);
-    expect(normalized.zlibraryUrl).toBe('https://articles.sk');
+    expect(normalized.zlibraryUrl).toBe('https://zlib.bz');
     expect(normalized.sourceUrl).toBe('https://annas-archive.pk');
   });
 });

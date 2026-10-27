@@ -65,7 +65,7 @@ describe('shared book source preferences', () => {
       localStorage.clear();
       window.dispatchEvent(new StorageEvent('storage', { key: null, storageArea: localStorage }));
     });
-    expect(search.result.current.preferences?.strategy).toBe('source');
+    expect(search.result.current.preferences?.strategy).toBe('zlibrary');
     expect(search.result.current.preferences?.zlibraryUrl).toBe('https://articles.sk');
   });
 });

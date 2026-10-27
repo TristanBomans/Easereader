@@ -1,9 +1,17 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { RouterProvider } from '@tanstack/react-router';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { router } from './routes';
+import { AppShell } from './components/layout/AppShell';
+import { SearchPage } from './components/search/SearchPage';
 import './index.css';
+
+// Remove search state left in bookmarks or tabs by earlier versions.
+const currentUrl = new URL(window.location.href);
+const legacyParams = ['q', 'strategy', 'zlibraryUrl', 'sourceUrl'];
+if (legacyParams.some((key) => currentUrl.searchParams.has(key))) {
+  legacyParams.forEach((key) => currentUrl.searchParams.delete(key));
+  window.history.replaceState(window.history.state, '', currentUrl);
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,7 +28,9 @@ if (rootElement) {
   createRoot(rootElement).render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
+        <AppShell>
+          <SearchPage />
+        </AppShell>
       </QueryClientProvider>
     </StrictMode>
   );

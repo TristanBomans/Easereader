@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { Link } from '@tanstack/react-router';
 import { Settings } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Toaster } from '../ui/Toast';
@@ -19,13 +18,9 @@ export function AppShell({ children }: AppShellProps) {
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-30 border-b border-border bg-bg/80 backdrop-blur">
         <div className="mx-auto flex h-11 max-w-3xl items-center justify-between px-4">
-          <Link
-            to="/"
-            search={{ q: '', strategy: 'source', zlibraryUrl: '', sourceUrl: '' }}
-            className="text-[13px] font-medium tracking-tight text-text-primary transition-colors hover:text-primary"
-          >
+          <span className="text-[13px] font-medium tracking-tight text-text-primary">
             Easereader
-          </Link>
+          </span>
           <Button
             variant="ghost"
             size="icon-sm"

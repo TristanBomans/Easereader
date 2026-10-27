@@ -9,11 +9,10 @@ Dit document legt de ontwerp- en codeerfylosofie vast voor de  frontend, zodat t
 - **Vite 8**
 - **Tailwind CSS 4** via `@tailwindcss/vite`
 - **TanStack Query** voor server-state
-- **TanStack Router** voor URL-gedreven navigatie en filters
 - **Lucide React** voor iconen
 - OpenAPI-client (`openapi-typescript` + `openapi-fetch`)
 
-De app is **desktop-first maar responsive**. Filters, zoeken en paginering horen in de URL; server-data leeft in Query.
+De app is **desktop-first maar responsive**. Zoeken en bronkeuze leven in de app, niet in de URL; server-data leeft in Query. De instellingen staan in een drawer op de enige pagina.
 
 ## Visuele fylosofie (t3code-geïnspireerd)
 
