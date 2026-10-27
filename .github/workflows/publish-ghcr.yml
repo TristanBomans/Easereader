@@ -1,4 +1,4 @@
-name: Publish to GHCR
+name: Publish PR test image
 
 on:
   workflow_dispatch:
@@ -11,45 +11,27 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout exact PR revision
         uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
+        with:
+          repository: TristanBomans/Easereader-upstream
+          ref: 7144b59f376a85978acea239b0b3affa856385c2
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Docker metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/tristanbomans/easereader
-          tags: |
-            type=raw,value=latest
-            type=sha,prefix=,format=short
-
-      - name: Build and push
+      - name: Build and publish PR test image
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: |
+            ghcr.io/tristanbomans/easereader:pr-1
+            ghcr.io/tristanbomans/easereader:pr-1-7144b59
+          labels: |
+            org.opencontainers.image.source=https://github.com/TristanBomans/Easereader
+            org.opencontainers.image.revision=7144b59f376a85978acea239b0b3affa856385c2
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: Make package public
-        continue-on-error: true
-        run: |
-          # Best-effort: package may already be public or need a UI toggle.
-          curl -sS -X POST \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github+json" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/user/packages/container/easereader/visibility" \
-            -d '{"visibility":"public"}' || true
