@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
-import { X } from 'lucide-react';
+import { Moon, Sun, X } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { SourceSelector } from '../search/SourceSelector';
 import { SenderForm, type SenderFormData } from '../senders/SenderForm';
@@ -14,6 +14,7 @@ import { useCreateSender } from '../../api/mutations/senderMutations';
 import { useCreateProfile } from '../../api/mutations/profileMutations';
 import { useToast } from '../../stores/toastStore';
 import { cn } from '../../lib/utils';
+import { setTheme, useTheme } from '../../lib/theme';
 
 type Tab = 'about' | 'sources' | 'senders' | 'profiles';
 
@@ -33,6 +34,7 @@ const tabs: { key: Tab; label: string }[] = [
 
 export function SettingsDrawer({ open, onOpenChange, activeTab, onActiveTabChange }: SettingsDrawerProps) {
   const toast = useToast();
+  const theme = useTheme();
   const { options, preferences, isLoading: sourcesLoading, setStrategy, setZlibraryUrl, setSourceUrl } = useBookSources();
   const { data: senders = [] } = useSenders();
   const { data: profiles = [] } = useProfiles();
@@ -78,6 +80,32 @@ export function SettingsDrawer({ open, onOpenChange, activeTab, onActiveTabChang
               <X className="h-4 w-4" />
               <span className="sr-only">Close</span>
             </DialogPrimitive.Close>
+          </div>
+
+          <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-2.5">
+            <span className="text-xs text-text-secondary">Appearance</span>
+            <div className="inline-flex rounded-md border border-border p-0.5" role="group" aria-label="Appearance">
+              {([
+                { value: 'dark', label: 'Dark', icon: Moon },
+                { value: 'light', label: 'Light', icon: Sun },
+              ] as const).map(({ value, label, icon: Icon }) => (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={theme === value}
+                  onClick={() => setTheme(value)}
+                  className={cn(
+                    'flex items-center gap-1.5 rounded px-2.5 py-1 text-xs transition-colors duration-150',
+                    theme === value
+                      ? 'bg-surface-elevated text-text-primary'
+                      : 'text-text-muted hover:text-text-secondary'
+                  )}
+                >
+                  <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="shrink-0 overflow-x-auto border-b border-border px-4 py-2.5">

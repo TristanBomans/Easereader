@@ -29,6 +29,26 @@ html {
   color-scheme: dark;
 }
 
+html[data-theme="light"] {
+  color-scheme: light;
+  --color-bg: #faf9f7;
+  --color-surface: #ffffff;
+  --color-surface-elevated: #eeedea;
+  --color-surface-hover: rgba(24, 24, 27, 0.06);
+  --color-border: rgba(24, 24, 27, 0.13);
+  --color-border-strong: rgba(24, 24, 27, 0.23);
+  --color-text-primary: #1c1c1e;
+  --color-text-secondary: #4d5056;
+  --color-text-muted: #62666d;
+  --color-primary: oklch(0.49 0.19 259.8);
+  --color-primary-hover: oklch(0.44 0.18 259.8);
+  --color-destructive: oklch(0.49 0.20 27.3);
+  --color-destructive-hover: oklch(0.44 0.19 27.3);
+  --color-success: oklch(0.44 0.13 149.2);
+  --color-warning: oklch(0.46 0.12 78.6);
+  --color-info: oklch(0.46 0.13 230);
+}
+
 body {
   @apply bg-bg text-text-primary font-sans antialiased;
   font-size: 13px;

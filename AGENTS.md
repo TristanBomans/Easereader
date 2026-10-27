@@ -25,7 +25,7 @@ De UI is donker, ingetogen en informatiedicht. Geen grote gradients, felle glows
 
 ### Designprincipes
 
-1. **Donker als standaard**: bijna-zwarte neutrale achtergrond, kaarten nauwelijks lichter.
+1. **Donker als standaard**: bijna-zwarte neutrale achtergrond, kaarten nauwelijks lichter. Respecteer ook het lichte thema in `index.css` en gebruik de gedeelde kleurentokens.
 2. **Subtiele diepte**: `bg` → `surface` → `surface-elevated` → `surface-hover` zijn kleine stappen van 2–4% wit.
 3. **Borders zijn structureel**, niet decoratief: 1px, laag contrast (`rgba(255,255,255,0.06)`), vaak alleen om kaarten en secties.
 4. **Kleur is semantisch**:
