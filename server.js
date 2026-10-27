@@ -11,7 +11,7 @@ const { v4: uuidv4 } = require('uuid');
 const { ZLibraryStrategy, AnnasArchiveStrategy } = require('./download-strategies');
 
 const app      = express();
-const PORT     = 3000;
+const PORT     = Number(process.env.PORT || 3000);
 
 // Developer-configurable book source choices. URLs exposed in Settings and
 // accepted from clients must be declared here.
@@ -410,8 +410,8 @@ app.put('/api/senders/:id', (req, res) => {
 
   const update = { ...req.body };
   delete update.type;
-  // Never let the client blank out a stored secret with the mask
-  SENSITIVE.forEach(k => { if (update[k] === '••••••') delete update[k]; });
+  // Keep the stored secret when an edit form leaves it blank or sends the mask.
+  SENSITIVE.forEach(k => { if (update[k] === '' || update[k] === '••••••') delete update[k]; });
   const next = { ...senders[idx], ...update, id: senders[idx].id, type: 'smtp' };
   if (!next.user || !next.host || !next.password) {
     return res.status(400).json({ error: 'user, host and password are required' });

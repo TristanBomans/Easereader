@@ -53,30 +53,14 @@ export function loadSourcePreferences(raw = getSourcePreferencesSnapshot()): Sou
   try {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as unknown;
-    if (
-      parsed &&
-      typeof parsed === 'object' &&
-      'strategy' in parsed &&
-      'zlibraryUrl' in parsed &&
-      'sourceUrl' in parsed &&
-      (parsed.strategy === 'zlibrary' || parsed.strategy === 'source') &&
-      typeof parsed.zlibraryUrl === 'string' &&
-      typeof parsed.sourceUrl === 'string'
-    ) {
-      const previous = parsed as SourcePreferences & { version?: number };
-      if (previous.version !== PREFERENCES_VERSION) {
-        return {
-          strategy: DEFAULT_STRATEGY,
-          zlibraryUrl: ['https://articles.sk', 'https://1lib.sk'].includes(previous.zlibraryUrl)
-            ? 'https://zlib.bz'
-            : previous.zlibraryUrl,
-          sourceUrl: previous.sourceUrl,
-        };
-      }
+    if (parsed && typeof parsed === 'object' &&
+        ('strategy' in parsed || 'zlibraryUrl' in parsed || 'sourceUrl' in parsed)) {
+      const previous = parsed as Partial<SourcePreferences>;
       return {
-        strategy: previous.strategy,
-        zlibraryUrl: previous.zlibraryUrl,
-        sourceUrl: previous.sourceUrl,
+        strategy: previous.strategy === 'source' || previous.strategy === 'zlibrary'
+          ? previous.strategy : DEFAULT_STRATEGY,
+        zlibraryUrl: typeof previous.zlibraryUrl === 'string' ? previous.zlibraryUrl : '',
+        sourceUrl: typeof previous.sourceUrl === 'string' ? previous.sourceUrl : '',
       };
     }
   } catch {

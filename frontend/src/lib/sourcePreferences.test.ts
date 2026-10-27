@@ -43,30 +43,43 @@ describe('sourcePreferences', () => {
     expect(loadSourcePreferences()).toEqual(saved);
   });
 
-  it('migrates existing defaults to Z-Library without losing the backup domain', () => {
+  it('preserves the selected source and domains from the original app', () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       strategy: 'source',
       zlibraryUrl: 'https://1lib.sk',
       sourceUrl: 'https://annas-archive.pk',
     }));
     expect(loadSourcePreferences()).toEqual({
-      strategy: 'zlibrary',
-      zlibraryUrl: 'https://zlib.bz',
+      strategy: 'source',
+      zlibraryUrl: 'https://1lib.sk',
       sourceUrl: 'https://annas-archive.pk',
     });
     const migrated = resolveSourcePreferences(sampleOptions);
+    expect(migrated).toEqual(loadSourcePreferences());
     saveSourcePreferences(migrated);
-    saveSourcePreferences({ ...migrated, strategy: 'source' });
-    expect(loadSourcePreferences()?.strategy).toBe('source');
+    expect(loadSourcePreferences()).toEqual(migrated);
   });
 
-  it('preserves a previously selected working Z-Library domain during migration', () => {
+  it('preserves an explicitly selected Z-Library domain during migration', () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      strategy: 'source',
-      zlibraryUrl: 'https://z-library.website',
+      strategy: 'zlibrary',
+      zlibraryUrl: 'https://articles.sk',
       sourceUrl: 'https://annas-archive.gl',
     }));
-    expect(loadSourcePreferences()?.zlibraryUrl).toBe('https://z-library.website');
+    expect(resolveSourcePreferences(sampleOptions)).toEqual({
+      strategy: 'zlibrary',
+      zlibraryUrl: 'https://articles.sk',
+      sourceUrl: 'https://annas-archive.gl',
+    });
+  });
+
+  it('preserves a partial older preference and fills in missing domains', () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ strategy: 'source' }));
+    expect(resolveSourcePreferences(sampleOptions)).toEqual({
+      strategy: 'source',
+      zlibraryUrl: 'https://zlib.bz',
+      sourceUrl: 'https://annas-archive.gl',
+    });
   });
 
   it('falls back when saved URL is no longer allowed', () => {

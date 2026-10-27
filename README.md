@@ -1,53 +1,43 @@
-# Easereader backend
+# Easereader
 
-This directory is a backend-only copy of Easereader, prepared for a new user
-interface. The legacy `public/index.html`, screenshots, and HTML examples are
-intentionally not included.
+Search for EPUB books and send them to a reading device using an SMTP sender and a device profile. Easereader supports Z-Library and Anna's Archive, and offers light and dark themes.
 
-See [NEW-UI-FEATURES.md](NEW-UI-FEATURES.md) for the functional specification
-and the API contract the replacement frontend must implement.
+## Run with Docker
+
+```bash
+docker pull ghcr.io/tristanbomans/easereader:latest
+docker run --rm -p 3000:3000 -v easereader-config:/config ghcr.io/tristanbomans/easereader:latest
+```
+
+Open <http://localhost:3000>. The volume stores senders, profiles and uploaded profile images. SMTP passwords are stored in the configuration directory, so keep backups private.
+
+### Upgrading an existing installation
+
+Back up the existing configuration first. Reuse the same volume or bind mount at `/config` when replacing the image; this keeps senders, profiles, their images and stored passwords. The storage format is unchanged and no data conversion is required. A changed Compose project name can result in a different named volume, so check the actual volume being mounted.
+
+The active source and selected domains are saved in browser storage. Existing selections are preserved when they remain available in `BOOK_SOURCE_OPTIONS`. Browser storage is tied to the address, so changing host, port or protocol starts with a fresh set of browser preferences. New installations default to Z-Library.
 
 ## Run locally
 
-### Backend
+Install backend dependencies and build the frontend before starting the application:
 
 ```bash
-npm install
+npm ci
+cd frontend
+npm ci
+npm run build
+cd ..
 npm start
 ```
 
-The API listens on `http://localhost:3000`. There is deliberately no page at
-`/`; API routes live below `/api`, profile images below `/uploads`, and download
-progress is published at `/ws/download-progress`.
+Open <http://localhost:3000>. Without the frontend build, the backend API is available but `/` does not serve the app. Data defaults to `data/`; set `CONFIG_DIR` to use another directory and `PORT` to change the listening port.
 
-### Frontend
+For frontend development, run the backend with `npm start`, then run `npm run dev` in `frontend/`. Vite serves <http://localhost:5173> and proxies `/api`, `/uploads`, and `/ws/download-progress` to the backend.
 
-```bash
-cd frontend
-npm install
-npm run dev
-```
+Run the backend integration tests with `npm test`. In `frontend/`, run `npm run typecheck`, `npm run lint`, `npm test` and `npm run build`.
 
-The Vite dev server runs on `http://localhost:5173` and proxies `/api`,
-`/uploads`, and `/ws/download-progress` to the backend on `localhost:3000`.
+## Sender and profile setup
 
-Available scripts:
+Open Settings, add an SMTP sender, then add a device profile with its delivery email address. Search for a book and use the profile button to send it. Your reading service may require the sender address to be approved first.
 
-- `npm run dev` — start dev server
-- `npm run build` — production build to `frontend/dist`
-- `npm run typecheck` — TypeScript strict check
-- `npm run lint` — ESLint
-- `npm run test` — Vitest unit tests
-- `npm run generate:api` — regenerate `src/api/types.ts` from `src/api/openapi.json`
-
-Persisted configuration defaults to `data/`. Set `CONFIG_DIR` to use another
-location. In Docker, mount a volume at `/config`:
-
-```bash
-docker build -t easereader-newui .
-docker run --rm -p 3000:3000 -v easereader-config:/config easereader-newui
-```
-
-Selectable source domains are controlled by `BOOK_SOURCE_OPTIONS` near the top
-of `server.js`. The backend rejects source URLs that are not in that allowlist.
-
+Available book source URLs are defined in `BOOK_SOURCE_OPTIONS` in `server.js`. The backend accepts only URLs listed there.
