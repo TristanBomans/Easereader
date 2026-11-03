@@ -104,6 +104,25 @@ setInterval(() => {
   }
 }, 5 * 60 * 1000);
 
+// Chromium holds 300–400 MB while open. On small hosts set BROWSER_IDLE_MINUTES
+// to close it after that long without use; 0 (default) keeps it open, which
+// also keeps the source's session cookies between a search and its download.
+const BROWSER_IDLE_MS = Math.max(0, Number(process.env.BROWSER_IDLE_MINUTES) || 0) * 60 * 1000;
+let browserIdleTimer = null;
+
+function scheduleBrowserIdleClose() {
+  if (!BROWSER_IDLE_MS) return;
+  clearTimeout(browserIdleTimer);
+  browserIdleTimer = setTimeout(async () => {
+    if (!browser) return;
+    // A download can keep a page open for minutes; only close a browser nobody uses.
+    const pages = await browser.pages().catch(() => []);
+    if (pages.length > 1) return scheduleBrowserIdleClose();
+    await restartBrowser(`idle for ${BROWSER_IDLE_MS / 60000} min`);
+  }, BROWSER_IDLE_MS);
+  browserIdleTimer.unref();
+}
+
 async function getBrowser() {
   if (!browser || !browser.connected) {
     console.log('Launching browser…');
@@ -113,6 +132,7 @@ async function getBrowser() {
     });
     console.log('Browser ready.');
   }
+  scheduleBrowserIdleClose();
   return browser;
 }
 

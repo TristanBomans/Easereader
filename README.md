@@ -30,7 +30,7 @@ cd ..
 npm start
 ```
 
-Open <http://localhost:3000>. Without the frontend build, the backend API is available but `/` does not serve the app. Data defaults to `data/`; set `CONFIG_DIR` to use another directory and `PORT` to change the listening port.
+Open <http://localhost:3000>. Without the frontend build, the backend API is available but `/` does not serve the app. Data defaults to `data/`; set `CONFIG_DIR` to use another directory and `PORT` to change the listening port. On hosts with little memory, set `BROWSER_IDLE_MINUTES` (for example `5`) to close the headless Chromium after that many minutes without searches or downloads; it is relaunched on the next request.
 
 For frontend development, run the backend with `npm start`, then run `npm run dev` in `frontend/`. Vite serves <http://localhost:5173> and proxies `/api`, `/uploads`, and `/ws/download-progress` to the backend.
 
